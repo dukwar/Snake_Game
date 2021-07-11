@@ -3,17 +3,21 @@ import {directionType} from "./types";
 export function start() {
     const canvas = document.getElementById("canvas") as HTMLCanvasElement
     const ctx = canvas.getContext("2d")
+    const blockSize = 20
     const width = canvas.width
     const height = canvas.height
-    const blockSize = 10
+
     const widthInBlocks = width / blockSize
     const heightInBlocks = height / blockSize
     let score = 0
+    let snakeSpeed = 100
+
+    const interval: NodeJS.Timeout[] = []
 
     // draw border
     const drawBorder = function () {
         if (ctx) {
-            ctx.fillStyle = "Gray";
+            ctx.fillStyle = "Gray"
             ctx.fillRect(0, 0, width, blockSize)
             ctx.fillRect(0, height - blockSize, width, blockSize)
             ctx.fillRect(0, 0, blockSize, height)
@@ -21,11 +25,18 @@ export function start() {
         }
     }
 
+    const drawBackGround = function () {
+        if (ctx) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
+            ctx.fillRect(0, 0, width, height)
+        }
+    }
+
 // draw score
     const drawScore = function () {
         if (ctx) {
             ctx.textBaseline = "top"
-            ctx.fillStyle = "Black"
+            ctx.fillStyle = "White"
             ctx.textAlign = "left"
             ctx.lineWidth = 5
             ctx.font = "20px Courier"
@@ -35,14 +46,31 @@ export function start() {
 
 // draw gameOver
     const gameOver = function () {
-        clearInterval()
+        clearInterval(interval[0])
         if (ctx) {
             ctx.font = "60px Courier"
-            ctx.fillStyle = "Black"
+            ctx.fillStyle = "White"
             ctx.textAlign = "center"
             ctx.textBaseline = "middle"
             ctx.fillText("Конец игры", width / 2, height / 2)
         }
+    }
+
+    const startInterval = function (speed: number) {
+
+        clearInterval(interval[0])
+        interval.pop()
+
+        const intervalId = setInterval(() => {
+            drawBackGround()
+            drawScore()
+            snake.move()
+            snake.draw()
+            apple.draw()
+            drawBorder()
+        }, speed)
+        interval.push(intervalId)
+
     }
 
 
@@ -75,7 +103,8 @@ export function start() {
             let x = this.col * blockSize
             let y = this.row * blockSize
             if (ctx) {
-                ctx.fillStyle = color
+                // ctx.fillStyle = color
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'
                 ctx.fillRect(x, y, blockSize, blockSize)
             }
 
@@ -97,6 +126,7 @@ export function start() {
 
     class Snake {
         segments: Block[]
+        speed: number
         direction: string
         nextDirection: string
 
@@ -108,6 +138,7 @@ export function start() {
             ]
             this.direction = "right"
             this.nextDirection = "right"
+            this.speed = 100
         }
 
 
@@ -137,12 +168,15 @@ export function start() {
             if (newHead) {
                 if (this.checkCollision(newHead)) {
                     gameOver()
-                    return;
+                    return
                 }
                 this.segments.unshift(newHead)
                 if (newHead.equal(apple.position)) {
-                    score++;
-                    apple.move();
+                    score++
+                    snakeSpeed -= 4
+                    startInterval(snakeSpeed)
+                    console.log(interval)
+                    apple.move()
                 } else {
                     this.segments.pop()
                 }
@@ -151,17 +185,17 @@ export function start() {
 
 
         checkCollision(head: Block) {
-            let leftCollision = (head.col === 0)
-            let topCollision = (head.row === 0)
-            let rightCollision = (head.col === widthInBlocks - 1)
-            let bottomCollision = (head.row === heightInBlocks - 1)
+            let leftCollision = head.col === 0
+            let topCollision = head.row === 0
+            let rightCollision = head.col === widthInBlocks - 1
+            let bottomCollision = head.row === heightInBlocks - 1
             let wallCollision = leftCollision || topCollision ||
                 rightCollision || bottomCollision
             let selfCollision = false
 
             for (let i = 0; i < this.segments.length; i++) {
                 if (head.equal(this.segments[i])) {
-                    selfCollision = true;
+                    selfCollision = true
                 }
             }
             return wallCollision || selfCollision
@@ -170,13 +204,13 @@ export function start() {
 
         setDirection(newDirection: string) {
             if (this.direction === "up" && newDirection === "down") {
-                return;
+                return
             } else if (this.direction === "right" && newDirection === "left") {
-                return;
+                return
             } else if (this.direction === "down" && newDirection === "up") {
-                return;
+                return
             } else if (this.direction === "left" && newDirection === "right") {
-                return;
+                return
             }
             this.nextDirection = newDirection
         }
@@ -205,16 +239,6 @@ export function start() {
     const apple = new Apple()
 
 
-    let intervalId = setInterval(function () {
-        if (ctx) ctx.clearRect(0, 0, width, height)
-        drawScore()
-        snake.move()
-        snake.draw()
-        apple.draw()
-        drawBorder()
-    }, 100)
-
-
     const directions: directionType = {
         "ArrowLeft": "left",
         "ArrowUp": "up",
@@ -225,7 +249,7 @@ export function start() {
 
     window.addEventListener("keydown", (e: KeyboardEvent) => {
         const newDirection = directions[e.code]
-        console.log(e.code)
+
         if (newDirection !== undefined) {
             snake.setDirection(newDirection);
         }
@@ -233,6 +257,7 @@ export function start() {
     })
 
 
+    startInterval(snakeSpeed)
 }
 
 

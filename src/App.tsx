@@ -9,9 +9,11 @@ function App() {
     }, [])
 
   return (
-    <canvas id="canvas" width="1000" height="700">
 
-    </canvas>
+      <canvas id="canvas" width={1200} height={900}>
+      </canvas>
+
+
   );
 }
 
