@@ -1,4 +1,4 @@
-import {directionType} from "./types";
+import {directionType} from "./types"
 
 export function start() {
     const canvas = document.getElementById("canvas") as HTMLCanvasElement
@@ -6,12 +6,10 @@ export function start() {
     const blockSize = 20
     const width = canvas.width
     const height = canvas.height
-
     const widthInBlocks = width / blockSize
     const heightInBlocks = height / blockSize
     let score = 0
     let snakeSpeed = 100
-
     const interval: NodeJS.Timeout[] = []
 
     // draw border
@@ -99,11 +97,10 @@ export function start() {
             this.row = row
         }
 
-        drawSquare(color: string) {
+        drawSquare() {
             let x = this.col * blockSize
             let y = this.row * blockSize
             if (ctx) {
-                // ctx.fillStyle = color
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'
                 ctx.fillRect(x, y, blockSize, blockSize)
             }
@@ -144,7 +141,7 @@ export function start() {
 
         draw() {
             for (let i = 0; i < this.segments.length; i++) {
-                this.segments[i].drawSquare("Blue")
+                this.segments[i].drawSquare()
             }
         }
 

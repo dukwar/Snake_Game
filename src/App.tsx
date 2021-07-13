@@ -10,7 +10,7 @@ function App() {
 
   return (
 
-      <canvas id="canvas" width={1200} height={900}>
+      <canvas id="canvas" className="canvas__main" width={1400} height={700} >
       </canvas>
 
 
